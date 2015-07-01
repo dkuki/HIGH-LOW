@@ -1,0 +1,350 @@
+<!doctype html>
+<html>
+	<head>
+	<meta charset="UTF-8">
+	<title>ハイロー</title>
+		<script src="jquery-1.8.3.min.js"></script>
+		<script>
+
+		//カード、数値定義（1～13）
+		var power = ["01","01","01","01","02","02","02","02","03","03","03","03","04","04","04","04","05","05","05","05","06","06","06","06","07","07","07","07","08","08","08","08","09","09","09","09","10","10","10","10","11","11","11","11","12","12","12","12","13","13","13","13"];
+
+		//カード配列定義（カードが場に出たかの確認用）
+		var cards = [];
+		for( var i = 0 ; i < 52 ; i++ ){
+			cards[i] = i
+		}
+		
+		var point = 1 ;	//ポイント（1勝ごとに2倍）
+		var rnd   = 0 ;	//ランダム数値格納変数
+		var p     = 0 ;	//プレイヤー側のカード番号（カードの数字ではない）
+		var en    = 0 ;	//ディーラー側もカード番号（カードの数字ではない）
+		var cDown = 52; //カードの残り枚数カウント変数
+
+		//rnd = Math.floor( Math.random() * 52 );
+		//document.write('<img src="images/' + rnd + '.gif">');
+		//document.write('<img src="images/5.gif">');
+
+		//document.write('<img src="images/z01.gif">');
+
+		$(function(){
+			$('#btnH').hide();
+			$('#btnL').hide();
+			$('#btnN').hide();
+			$('#btnE').hide();
+			$('#txtPoint').text("SCORE　：　" + point);
+			$('#txtDown').text("　　　残りカード　：　" + cDown);
+		});
+
+		//
+		//	とりあえず、なんとかそれっぽく動くバージョン
+		//	土日で頑張って、同じカードが出ないようにするとか、ポイント制を導入とかやる予定。
+		//	あと、ドロー処理やら、スタイル調整とか、、
+		//	ボタン小さすぎ、かっこいいボタン画像求む（汗
+		//
+
+		//スタートが押された場合の処理
+		function push_s(){
+		
+				
+			//場に出ていないカード番号が出るまで0～51までの乱数を発生させる
+			while( cards[rnd] == 0 ){
+				rnd = Math.floor( Math.random() * 52 );
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入、残りカード枚数-1
+			cards[rnd] = 0 ;
+			cDown-- ;
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnH').show();
+				$('#btnL').show();
+				$('#btnN').hide();
+				$('#btnE').hide();
+				$('#imgE').html('<img src="images/' + rnd + '.gif">');
+				$('#txtPoint').text("SCORE　：　" + point);
+				$('#txtDown').text("　　　残りカード　：　" + cDown);
+			});
+						
+			en = power[rnd];
+			
+			
+		}
+
+		//ハイが押された場合の処理
+		function push_h(){
+		
+			//場に出ていないカード番号が出るまで0～51までの乱数を発生させる
+			while( cards[rnd] == 0 ){
+				rnd = Math.floor( Math.random() * 52 );
+				
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入、残りカード枚数-1
+			cards[rnd] = 0 ;
+			cDown-- ;
+			
+			p = power[rnd];
+			
+			if( p > en ){
+				//プレイヤーの勝ちなら
+				$(function(){
+					$('#imgResult').html('<img src="images/WIN.png" alt="win" width="250" height="130">');
+					$('#txtPoint').text("SCORE　：　" + point);
+					$('#txtDown').text("　　　残りカード　：　" + cDown);
+					point = point * 2 ;
+				});
+			}else if( p == en ){
+				//プレイヤーのドロー
+				$(function(){
+					$('#imgResult').html('<img src="images/DRAW.png" alt="draw" width="250" height="130">');
+					$('#txtPoint').text("SCORE　：　" + point);
+					$('#txtDown').text("　　　残りカード　：　" + cDown);
+				});
+			}else{
+				//プレイヤーの負け
+				$(function(){
+					$('#imgResult').html('<img src="images/LOSE.png" alt="lose" width="250" height="130">');
+					$('#txtPoint').text("SCORE　：　" + point);
+					$('#txtDown').text("　　　残りカード　：　" + cDown);
+					
+					point = 1 ;
+					
+					//カード配列リセット（全カードを親へ）
+					for( var i = 0 ; i < 52 ; i++ ){
+						cards[i] = i;
+					}
+					cDown = 51; //カードの残り枚数リセット
+				});
+			}
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnH').hide();
+				$('#btnL').hide();
+				$('#btnN').show();
+				$('#btnE').show();
+				$('#imgP').html('<img src="images/' + rnd + '.gif" alt="" width="200" height="300">');
+				//$('#txtPoint').text("SCORE　：　" + point);
+				//$('#txtDown').text("　　　残りカード　：　" + cDown);
+			});
+			
+			//残りカード1枚まで勝ち進んだら(カード枚数、配列をリセット（暫定））
+			if(cDown <= 1){
+				for( var i = 0 ; i < 52 ; i++ ){
+					cards[i] = i;
+				}
+				cDown = 51; //カードの残り枚数リセット
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入
+			cards[rnd] = 0 ;
+		}
+
+		//ローが押された場合の処理
+		function push_l(){
+		
+			//場に出ていないカード番号が出るまで0～51までの乱数を発生させる
+			while( cards[rnd] == 0 ){
+				rnd = Math.floor( Math.random() * 52 );
+			}
+			//alert("");
+			//出たカードを判別するため、カード配列に0を代入、残りカード枚数-1
+			cards[rnd] = 0 ;
+			cDown-- ;
+			
+			p = power[rnd];
+			
+			
+			if( p < en ){
+				//プレイヤーの勝ちなら
+				$(function(){
+					$('#imgResult').html('<img src="images/WIN.png" alt="win" width="250" height="130">');
+					$('#txtPoint').text("SCORE　：　" + point);
+					$('#txtDown').text("　　　残りカード　：　" + cDown);
+					point = point * 2 ;
+				});
+			}else if( p == en ){
+				//プレイヤーのドロー
+				$(function(){
+					$('#imgResult').html('<img src="images/DRAW.png" alt="draw" width="250" height="130">');
+					$('#txtPoint').text("SCORE　：　" + point);
+					$('#txtDown').text("　　　残りカード　：　" + cDown);
+				});
+			}else{
+				//プレイヤーの負け、もしくはドロー（ドロー処理まだのため負け扱い）
+				$(function(){
+					$('#imgResult').html('<img src="images/LOSE.png" alt="lose" width="250" height="130">');
+					$('#txtPoint').text("SCORE　：　" + point);
+					$('#txtDown').text("　　　残りカード　：　" + cDown);
+					
+					point = 1 ;
+					
+					//カード配列リセット（全カードを親へ）
+					for( var i = 0 ; i < 52 ; i++ ){
+						cards[i] = i;
+					}
+					cDown = 51; //カードの残り枚数リセット
+					
+				});
+			}
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnH').hide();
+				$('#btnL').hide();
+				$('#btnN').show();
+				$('#btnE').show();
+				$('#imgP').html('<img src="images/' + rnd + '.gif" alt="" width="200" height="300">');
+				//$('#txtPoint').text("SCORE　：　" + point);
+				//$('#txtDown').text("　　　残りカード　：　" + cDown);
+			});
+			
+			//残りカード1枚まで勝ち進んだら(カード枚数、配列をリセット（暫定））
+			if(cDown <= 1){
+				for( var i = 0 ; i < 52 ; i++ ){
+					cards[i] = i;
+				}
+				cDown = 51; //カードの残り枚数リセット
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入
+			cards[rnd] = 0 ;
+		}
+		
+		//続けるが押された場合の処理
+		function push_n(){
+			
+			en = p;
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnN').hide();
+				$('#btnE').hide();
+				
+				$('#imgE').hide();
+				$('#imgResult').hide();
+				
+				$('#imgP').animate({'margin-left':'450px'},600);
+
+				setTimeout(function(){
+					$('#imgP').animate({'margin-left':'0px'},0);
+					$('#imgResult').html('<img src="images/BLANK.png" alt="BLANK" width="250" height="130">');
+					$('#imgResult').show();
+					$('#imgE').html('<img src="images/' + rnd + '.gif" alt="" width="200" height="300">');
+					$('#imgE').show();
+					$('#imgP').html('<img src="images/z01.gif" alt="" width="200" height="300">');
+					$('#btnH').show();
+					$('#btnL').show();
+					$('#txtPoint').text("SCORE　：　" + point);
+					$('#txtDown').text("　　　残りカード　：　" + cDown);
+				},600);
+
+			});
+		}
+		
+		//終わるが押された場合の処理
+		function push_e(){
+			
+			//カード配列、ポイント、残りカード数をリセット
+			for( var i = 0 ; i < 52 ; i++ ){
+				cards[i] = i
+			}
+			point = 1 ;
+			cDown = 52; //カードの残り枚数リセット
+			
+			
+			$(function(){
+				$('#btnS').show();
+				$('#btnH').hide();
+				$('#btnL').hide();
+				$('#btnN').hide();
+				$('#btnE').hide();
+				$('#imgP').html('<img src="images/z01.gif" alt="" width="200" height="300">');
+				$('#imgResult').html('<img src="images/BLANK.png" alt="BLANK" width="250" height="130">');
+				$('#imgE').html('<img src="images/z01.gif" alt="" width="200" height="300">');
+				$('#txtPoint').text("SCORE　：　" + point);
+				$('#txtDown').text("　　　残りカード　：　" + cDown);
+			});
+		}
+		
+		
+		</script>
+
+		<style>
+		
+		body{
+			background-image: url("images/background_b.jpg");
+			background-repeat: no-repeat;
+			background-position: center center;
+			text-align: center;
+		}
+		
+		.base{
+			margin: 0 auto 0 auto ;
+			width : 650px ;
+		}
+		
+		#imgP{
+			float: left;
+		}
+		#imgResult{
+			float: left;
+			padding-top : 80px ;
+		}
+		#imgE{
+			float: left;
+		}
+		
+		#btnD{
+			opacity: 0;
+		}
+		.clear{
+			clear:both;
+		}
+		
+		</style>
+
+	</head>
+
+	<body>
+	<br><br>
+		<table>
+			<tr>
+				<tb id = "btnD"><input type="button" value="□"></tb>			<!--ダミーボタン-->
+				<tb id = "btnS"><input type="button" value="スタート" onclick="push_s()"></tb>
+				<tb id = "btnH"><input type="button" value="ハイ" onclick="push_h()"></tb>
+				<tb id = "btnL"><input type="button" value="ロー" onclick="push_l()"></tb>
+				<tb id = "btnN"><input type="button" value="続ける" onclick="push_n()"></tb>
+				<tb id = "btnE"><input type="button" value="終わる" onclick="push_e()"></tb>
+				<tb id = "btnD"><input type="button" value="□"></tb>			<!--ダミーボタン-->
+			</tr>
+		</table>
+		<br><br><br>
+		
+		<div class="base">
+			<div id = "imgP" ><img src="images/z01.gif" alt="" width="200" height="300"></div>
+			<div id = "imgResult"><img src="images/BLANK.png" alt="BLANK" width="250" height="130"></div>
+			<div id = "imgE"><img src="images/z01.gif" alt="" width="200" height="300"></div>
+		</div>
+		<br>
+		<div class = clear>
+				<h2 id = "txtPoint"></h2>
+				<h2 id = "txtDown"></h2>
+		</div>
+		
+		<!--
+		<form name="quiz">
+			<input type="button" value="スタート" onclick="push_s()">
+			<input type="button" value="ハイ" onclick="push_h()">
+			<input type="button" value="ロー" onclick="push_l()">
+			<input type="button" value="続ける" onclick="push_n()">
+			<input type="text" value="">
+			<br>
+			<img src="images/z01.gif">
+		</form>
+		-->
+
+	</body>
+</html>

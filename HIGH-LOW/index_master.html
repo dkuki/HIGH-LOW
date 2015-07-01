@@ -1,0 +1,406 @@
+<!doctype html>
+<html>
+	<head>
+	<meta charset="UTF-8">
+	<title>ハイロー</title>
+		<script src="jquery-1.8.3.min.js"></script>
+		<script>
+
+		//カード、数値定義（1～13）
+		var power = ["01","01","01","01","02","02","02","02","03","03","03","03","04","04","04","04","05","05","05","05","06","06","06","06","07","07","07","07","08","08","08","08","09","09","09","09","10","10","10","10","11","11","11","11","12","12","12","12","13","13","13","13"];
+
+		//カード配列定義（カードが場に出たかの確認用）
+		var cards = [];
+		for( var i = 0 ; i < 52 ; i++ ){
+			cards[i] = i
+		}
+		var point = 10 ;	//ポイント
+		var bet = 0;		//賭け金（1勝ごとに2倍）
+		var rnd   = 0 ;	//ランダム数値格納変数
+		var p     = 0 ;	//プレイヤー側のカード番号（数字1～13）
+		var en    = 0 ;	//ディーラー側のカード番号（数字1～13）
+		var cDown = 52; //カードの残り枚数カウント変数
+
+		$(function(){
+			
+			//--------起動時フェードIN部分--------
+			$('#btnS').hide();	
+			$('#imgP').hide();
+			$('#imgE').hide();
+			$('#imgP').fadeIn("2000");
+			$('#imgE').fadeIn("2000");
+			$('#btnS').fadeIn("2500");
+			//--------起動時フェードIN部分--------
+		
+		
+			$('#btnH').hide();
+			$('#btnL').hide();
+			$('#btnN').hide();
+			$('#btnE').hide();
+			$('#txtbet').text("　bet　：　" + bet+"　");
+			$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+			$('#txtDown').text("　残りカード　：　" + cDown+"　");
+		});
+
+		//
+		//	とりあえず、なんとかそれっぽく動くバージョン
+		//	土日で頑張って、同じカードが出ないようにするとか、ポイント制を導入とかやる予定。
+		//	あと、ドロー処理やら、スタイル調整とか、、
+		//	ボタン小さすぎ、かっこいいボタン画像求む（汗
+		//
+
+	//スタートが押された場合の処理
+		function push_s(){
+		
+				
+			//場に出ていないカード番号が出るまで0～51までの乱数を発生させる
+			while( cards[rnd] == 0 ){
+				rnd = Math.floor( Math.random() * 52 );
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入、残りカード枚数-1
+			cards[rnd] = 0 ;
+			cDown-- ;
+			
+			//ベット10固定、ポイントから減らす
+			bet = 10;
+			point = point - bet;
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnH').show();
+				$('#btnL').show();
+				$('#btnN').hide();
+				$('#btnE').hide();
+				$('#imgE').html('<img src="images/' + rnd + '.gif">');
+				$('#txtbet').text("　bet　：　" + bet+"　");
+				$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+				$('#txtDown').text("　残りカード　：　" + cDown+"　");
+			});
+						
+			en = power[rnd];
+			
+			
+		}
+
+	//ハイが押された場合の処理
+		function push_h(){
+		
+			//場に出ていないカード番号が出るまで0～51までの乱数を発生させる
+			while( cards[rnd] == 0 ){
+				rnd = Math.floor( Math.random() * 52 );
+				
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入、残りカード枚数-1
+			cards[rnd] = 0 ;
+			cDown-- ;
+			
+			p = power[rnd];
+			
+			if( p > en ){
+				//プレイヤーの勝ちなら
+				$(function(){
+					bet = bet * 2;
+					$('#imgResult').html('<img src="images/WIN.png" alt="win" width="250" height="130">');
+					$('#txtbet').text("　bet　：　" + bet+"　");
+					$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+					$('#txtDown').text("　残りカード　：　" + cDown+"　");
+				});
+			}else if( p == en ){
+				//プレイヤーのドロー
+				$(function(){
+					$('#imgResult').html('<img src="images/DRAW.png" alt="draw" width="250" height="130">');
+					$('#txtbet').text("　bet　：　" + bet+"　");
+					$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+					$('#txtDown').text("　残りカード　：　" + cDown+"　");
+				});
+			}else{
+				//プレイヤーの負け
+				$(function(){
+					bet = 0;
+					$('#imgResult').html('<img src="images/LOSE.png" alt="lose" width="250" height="130">');
+					$('#txtbet').text("　bet　：　" + bet+"　");
+					$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+					$('#txtDown').text("　残りカード　：　" + cDown+"　");
+					
+				});
+			}
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnH').hide();
+				$('#btnL').hide();
+				$('#btnN').show();
+				$('#btnE').show();
+				$('#imgP').html('<img src="images/' + rnd + '.gif" alt="" width="200" height="300">');
+				//$('#txtbet').text("bet　：　" + bet);
+				//$('#txtPoint').text(コイン枚数　：　" + point);
+				//$('#txtDown').text("　　　残りカード　：　" + cDown);
+			});
+			
+			//残りカード1枚まで勝ち進んだら(カード枚数、配列をリセット（暫定））
+			if(cDown <= 1){
+				for( var i = 0 ; i < 52 ; i++ ){
+					cards[i] = i;
+				}
+				cDown = 51; //カードの残り枚数リセット
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入
+			cards[rnd] = 0 ;
+		}
+
+	//ローが押された場合の処理
+		function push_l(){
+		
+			//場に出ていないカード番号が出るまで0～51までの乱数を発生させる
+			while( cards[rnd] == 0 ){
+				rnd = Math.floor( Math.random() * 52 );
+			}
+			//alert("");
+			//出たカードを判別するため、カード配列に0を代入、残りカード枚数-1
+			cards[rnd] = 0 ;
+			cDown-- ;
+			
+			p = power[rnd];
+			
+			
+			if( p < en ){
+				//プレイヤーの勝ちなら
+				$(function(){
+					bet = bet * 2 ;
+					$('#imgResult').html('<img src="images/WIN.png" alt="win" width="250" height="130">');
+					$('#txtbet').text("　bet　：　" + bet+"　");
+					$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+					$('#txtDown').text("　残りカード　：　" + cDown+"　");
+				});
+			}else if( p == en ){
+				//プレイヤーのドロー
+				$(function(){
+					$('#imgResult').html('<img src="images/DRAW.png" alt="draw" width="250" height="130">');
+					$('#txtbet').text("　bet　：　" + bet+"　");
+					$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+					$('#txtDown').text("　残りカード　：　" + cDown+"　");
+				});
+			}else{
+				//プレイヤーの負け
+				$(function(){
+					bet = 0;
+					$('#imgResult').html('<img src="images/LOSE.png" alt="lose" width="250" height="130">');
+					$('#txtbet').text("　bet　：　" + bet+"　");
+					$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+					$('#txtDown').text("　残りカード　：　" + cDown+"　");
+					
+				});
+			}
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnH').hide();
+				$('#btnL').hide();
+				$('#btnN').show();
+				$('#btnE').show();
+				$('#imgP').html('<img src="images/' + rnd + '.gif" alt="" width="200" height="300">');
+				//$('#txtbet').text("bet　：　" + bet);
+				//$('#txtPoint').text("コイン枚数　：　" + point);
+				//$('#txtDown').text("　　　残りカード　：　" + cDown);
+			});
+			
+			//残りカード1枚まで勝ち進んだら(カード枚数、配列をリセット（暫定））
+			if(cDown <= 1){
+				for( var i = 0 ; i < 52 ; i++ ){
+					cards[i] = i;
+				}
+				cDown = 51; //カードの残り枚数リセット
+			}
+			
+			//出たカードを判別するため、カード配列に0を代入
+			cards[rnd] = 0 ;
+		}
+		
+	//続けるが押された場合の処理
+		function push_n(){
+			
+			en = p;						//プレイヤーカードをディーラーに移す
+			if(bet == 0){				//負けた場合
+				bet =10;				//betは10に初期化
+				point =point -bet;
+			}
+			if(point < 10){				//ポイントマイナスなら0に
+				point = 0;
+			}
+			
+			$(function(){
+				$('#btnS').hide();
+				$('#btnN').hide();
+				$('#btnE').hide();
+				
+				$('#imgResult').html('<img src="images/BLANK.png" alt="BLANK" width="250" height="130">');
+				$('#imgE').fadeOut("350");
+				
+				setTimeout(function(){
+				
+				$('#imgResult').hide();
+				
+				$('#imgP').animate({'margin-left':'450px'},600);
+				
+				//プレイヤーカード、デーラーカード位置への移動後の処理
+				setTimeout(function(){
+					$('#imgP').animate({'margin-left':'0px'},0);
+					//$('#imgResult').html('<img src="images/BLANK.png" alt="BLANK" width="250" height="130">');
+					$('#imgResult').show();
+					$('#imgE').html('<img src="images/' + rnd + '.gif" alt="" width="200" height="300">');
+					$('#imgE').show();
+					
+					//プレイヤーカード、フェードIN
+					$('#imgP').hide().html('<img src="images/z01.gif" alt="" width="200" height="300">');
+					$('#imgP').fadeIn("1500");
+					
+					$('#btnH').show();
+					$('#btnL').show();
+					$('#txtbet').text("　bet　：　" + bet+"　");
+					$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+					$('#txtDown').text("　残りカード　：　" + cDown+"　");
+				},650);
+				},450);
+
+			});
+		}
+		
+	//終わるが押された場合の処理
+		function push_e(){
+			
+			//カード配列、ポイント、残りカード数をリセット
+			for( var i = 0 ; i < 52 ; i++ ){
+				cards[i] = i
+			}
+			cDown = 52; //カードの残り枚数リセット
+			
+			point = point + bet ;	//bet確定でポイントにプラス
+			bet = 0;
+			if(point < 10){			//ポイント10保障
+				point = 10;
+			}
+			
+			
+			
+			$(function(){
+			
+				
+				//--------起動時フェードIN部分--------
+				$('#btnS').hide();	
+				$('#imgP').hide();
+				$('#imgE').hide();
+				$('#imgP').fadeIn("2000");
+				$('#imgE').fadeIn("2000");
+				$('#btnS').fadeIn("2500");
+				//--------起動時フェードIN部分--------
+			
+				$('#btnH').hide();
+				$('#btnL').hide();
+				$('#btnN').hide();
+				$('#btnE').hide();
+				$('#imgP').html('<img src="images/z01.gif" alt="" width="200" height="300">');
+				$('#imgResult').html('<img src="images/BLANK.png" alt="BLANK" width="250" height="130">');
+				$('#imgE').html('<img src="images/z01.gif" alt="" width="200" height="300">');
+				$('#txtbet').text("　bet　：　" + bet+"　");
+				$('#txtPoint').text("　コイン枚数　：　" + point+"　");
+				$('#txtDown').text("　残りカード　：　" + cDown+"　");
+			});
+		}
+		
+		
+		</script>
+
+		<style>
+		
+		body{
+			margin : 0 0 0 0 ;
+//			width : 800 ;
+//			height : 599 ;
+			background-image: url("images/background_b.jpg");
+			background-repeat: no-repeat;
+			background-position: center 0 ;
+			text-align: center;
+		}
+		p{
+			display : inline;
+			background-color: black;
+			color : white;
+			margin : 3px;
+			padding : 3px;
+			font-size : 20px;
+			font-weight : bold;
+			line-height : 300%;
+		}
+		.base{
+			margin: 0 auto 0 auto ;
+			width : 650px ;
+		}
+		
+		#imgP{
+			float: left;
+		}
+		#imgResult{
+			float: left;
+			padding-top : 60px ;
+		}
+		#imgE{
+			float: left;
+		}
+		
+									/*画像の表示位置～ここから*/
+		#btnS,#btnH,#btnL,#btnN,#btnE{
+			border:none;
+			margin:0 20px ;
+			outline:none;
+		}/*
+		#btnN{
+  			margin:0 -15px 0 -37px;
+ 			padding:0 20px 0 15px;
+ 		}*/
+		td #btnD{
+			opacity: 0;
+		}
+		
+									/*画像の表示位置～ここまで*/
+		
+		.clear{
+			clear:both;
+		}
+		
+//		*{outline : 1px solid red;}
+		</style>
+
+	</head>
+
+	<body>
+	<br><br><br><br>
+		<table>
+			<tr>
+				<tb id = "btnD"><input type="image" src="images/dummy.png" alt="" width="46" height="35">				<!--ボタンエリア縦幅確保用、ダミーボタン-->
+				<tb id = "btnS"><input type="image" src="images/start1.png" alt="start" onclick="push_s()"></tb>
+				<tb id = "btnH"><input type="image" src="images/high1.png" alt="high"  onclick="push_h()"></tb>
+				<tb id = "btnL"><input type="image" src="images/low1.png" alt="low"  onclick="push_l()"></tb>
+				<tb id = "btnN"><input type="image" src="images/continue1.png" alt="continue" onclick="push_n()"></tb>
+				<tb id = "btnE"><input type="image" src="images/stop1.png" alt="stop" onclick="push_e()"></tb>
+				<tb id = "btnD"><input type="image" src="images/dummy.png" alt="" width="46" height="35">				<!--ボタンエリア縦幅確保用、ダミーボタン-->
+			</tr>
+		</table>
+		<br><br><br><br><br><br>
+		
+		<div class="base">
+			<div id = "imgP" ><img src="images/z01.gif" alt="" width="200" height="300"></div>
+			<div id = "imgResult"><img src="images/BLANK.png" alt="BLANK" width="250" height="130"></div>
+			<div id = "imgE"><img src="images/z01.gif" alt="" width="200" height="300"></div>
+		</div>
+		<br>
+		<div class = clear>
+				<p id = "txtbet"></p>
+				<p id = "txtPoint"></p>
+				<p id = "txtDown"></p>
+		</div>
+		
+	</body>
+</html>
